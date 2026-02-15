@@ -6,6 +6,10 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 env:
   DOTNET_VERSION: "10.0.x"
   AZURE_WEBAPP_NAME: "publog-app" # Replace with your Azure App Service name
