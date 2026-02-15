@@ -1,0 +1,18 @@
+<nav class="flex gap-3 mb-6 border-b border-gray-200 pb-3">
+    <a href="/admin/areas" class="text-sm font-medium min-h-[44px] flex items-center px-3 rounded-lg hover:bg-amber-50 @(IsActive("/admin/areas") ? "bg-amber-100 text-amber-800" : "text-gray-600")">
+        Areas
+    </a>
+    <a href="/admin/pubs" class="text-sm font-medium min-h-[44px] flex items-center px-3 rounded-lg hover:bg-amber-50 @(IsActive("/admin/pubs") ? "bg-amber-100 text-amber-800" : "text-gray-600")">
+        Pubs
+    </a>
+</nav>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = null!;
+
+    private bool IsActive(string path)
+    {
+        var uri = new Uri(Navigation.Uri);
+        return uri.AbsolutePath.StartsWith(path, StringComparison.OrdinalIgnoreCase);
+    }
+}
