@@ -1,0 +1,91 @@
+@page "/pub/{Id:int}"
+@rendermode InteractiveServer
+@inject PubService PubService
+@inject NavigationManager Navigation
+
+<PageTitle>@(pub?.Name ?? "Pub") - PubLog</PageTitle>
+
+@if (pub is null)
+{
+    <p class="text-gray-500">Loading...</p>
+}
+else
+{
+    <div class="mb-4">
+        <a href="/area/@pub.AreaId" class="text-amber-600 hover:text-amber-800 text-sm">&larr; @pub.Area.Name</a>
+    </div>
+
+    <h1 class="text-2xl font-bold text-amber-900 mb-2">@pub.Name</h1>
+
+    @if (!string.IsNullOrWhiteSpace(pub.Address))
+    {
+        <p class="text-gray-600 mb-4">@pub.Address</p>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(pub.ImageUrl))
+    {
+        <img src="@pub.ImageUrl" alt="@pub.Name" class="w-full max-w-lg rounded-xl mb-4 object-cover max-h-64" />
+    }
+
+    @if (!string.IsNullOrWhiteSpace(pub.Description))
+    {
+        <p class="text-gray-700 mb-6">@pub.Description</p>
+    }
+
+    <div class="mb-6">
+        <LeafletMap CenterLat="pub.Lat" CenterLng="pub.Lng" Zoom="16" Height="300px"
+                    Markers="GetMarkers()" />
+    </div>
+
+    <div class="flex flex-wrap gap-3 mb-6">
+        <a href="https://www.google.com/maps/search/?api=1&query=@pub.Lat,@pub.Lng"
+           target="_blank" rel="noopener" class="btn-secondary !text-sm">
+            Google Maps
+        </a>
+        <a href="https://www.tripadvisor.com/Search?q=@Uri.EscapeDataString(pub.Name + " " + pub.Address)"
+           target="_blank" rel="noopener" class="btn-secondary !text-sm">
+            TripAdvisor
+        </a>
+    </div>
+
+    @if (pub.Visits.Count > 0)
+    {
+        <h2 class="text-lg font-semibold text-amber-800 mb-3">Visits (@pub.Visits.Count)</h2>
+        <div class="space-y-2">
+            @foreach (var visit in pub.Visits.OrderByDescending(v => v.VisitDate))
+            {
+                <div class="card">
+                    <div class="flex items-center justify-between">
+                        <span class="font-medium text-gray-800">@visit.User.DisplayName</span>
+                        <span class="text-sm text-gray-500">@visit.VisitDate.ToString("d MMM yyyy")</span>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(visit.Notes))
+                    {
+                        <p class="text-sm text-gray-600 mt-1">@visit.Notes</p>
+                    }
+                </div>
+            }
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Pub? pub;
+
+    private List<MapMarker> GetMarkers()
+    {
+        if (pub is null) return [];
+        return [new MapMarker(pub.Lat, pub.Lng, $"<b>{pub.Name}</b>")];
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        pub = await PubService.GetById(Id);
+        if (pub is null)
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+}

@@ -1,0 +1,66 @@
+@page "/admin/pubs"
+@attribute [Authorize(Roles = "Admin")]
+@rendermode InteractiveServer
+@inject PubService PubService
+@inject NavigationManager Navigation
+
+<PageTitle>Manage Pubs - PubLog</PageTitle>
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-amber-900">Manage Pubs</h1>
+    <a href="/admin/pubs/new" class="btn-primary">Add Pub</a>
+</div>
+
+@if (pubs is null)
+{
+    <p class="text-gray-500">Loading...</p>
+}
+else if (pubs.Count == 0)
+{
+    <p class="text-gray-500">No pubs yet. <a href="/admin/pubs/new" class="text-amber-600 underline">Add one</a>.</p>
+}
+else
+{
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <p class="mb-4 text-sm text-green-600">@message</p>
+    }
+
+    <div class="space-y-3">
+        @foreach (var pub in pubs)
+        {
+            <div class="card flex items-center justify-between">
+                <div>
+                    <span class="font-semibold text-gray-800">@pub.Name</span>
+                    <span class="text-sm text-gray-500 ml-2">(@pub.Area.Name)</span>
+                </div>
+                <div class="flex gap-2">
+                    <a href="/admin/pubs/@pub.Id/edit" class="btn-secondary !py-2 !text-sm">Edit</a>
+                    <button @onclick="() => DeletePub(pub)" class="btn-danger !py-2 !text-sm">Delete</button>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<Pub>? pubs;
+    private string? message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPubs();
+    }
+
+    private async Task LoadPubs()
+    {
+        pubs = await PubService.GetAll();
+    }
+
+    private async Task DeletePub(Pub pub)
+    {
+        await PubService.Delete(pub.Id);
+        message = $"'{pub.Name}' deleted.";
+        await LoadPubs();
+    }
+}

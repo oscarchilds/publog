@@ -1,0 +1,41 @@
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<div id="@_elementId" style="height: @Height; width: 100%; border-radius: 0.75rem; z-index: 0;"></div>
+
+@code {
+    [Parameter] public double CenterLat { get; set; } = 53.35;
+    [Parameter] public double CenterLng { get; set; } = -6.26;
+    [Parameter] public int Zoom { get; set; } = 13;
+    [Parameter] public List<MapMarker> Markers { get; set; } = [];
+    [Parameter] public string Height { get; set; } = "400px";
+
+    private string _elementId = $"map-{Guid.NewGuid():N}";
+    private bool _initialized;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("leafletInterop.init", _elementId, CenterLat, CenterLng, Zoom);
+            _initialized = true;
+
+            if (Markers.Count > 0)
+            {
+                await JS.InvokeVoidAsync("leafletInterop.addMarkers", _elementId, Markers);
+            }
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_initialized)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("leafletInterop.dispose", _elementId);
+            }
+            catch (JSDisconnectedException) { }
+        }
+    }
+}

@@ -1,0 +1,177 @@
+@page "/admin/pubs/new"
+@page "/admin/pubs/{Id:int}/edit"
+@attribute [Authorize(Roles = "Admin")]
+@rendermode InteractiveServer
+@inject PubService PubService
+@inject AreaService AreaService
+@inject NavigationManager Navigation
+
+<PageTitle>@(Id.HasValue ? "Edit Pub" : "Add Pub") - PubLog</PageTitle>
+
+<h1 class="text-2xl font-bold text-amber-900 mb-6">@(Id.HasValue ? "Edit Pub" : "Add Pub")</h1>
+
+@if (!loaded)
+{
+    <p class="text-gray-500">Loading...</p>
+}
+else
+{
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+            @errorMessage
+        </div>
+    }
+
+    <EditForm Model="model" OnValidSubmit="HandleSubmit" FormName="pubform">
+        <DataAnnotationsValidator />
+
+        <div class="space-y-4 max-w-lg">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Area</label>
+                <select @bind="model.AreaId" class="input-field">
+                    <option value="0">-- Select area --</option>
+                    @foreach (var area in areas)
+                    {
+                        <option value="@area.Id">@area.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <InputText @bind-Value="model.Name" class="input-field" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <InputTextArea @bind-Value="model.Description" class="input-field" rows="3" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <InputText @bind-Value="model.Address" class="input-field" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+                    <InputNumber @bind-Value="model.Lat" class="input-field" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+                    <InputNumber @bind-Value="model.Lng" class="input-field" />
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Image URL (optional)</label>
+                <InputText @bind-Value="model.ImageUrl" class="input-field" />
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="btn-primary" disabled="@saving">
+                    @(saving ? "Saving..." : (Id.HasValue ? "Update Pub" : "Create Pub"))
+                </button>
+                <a href="/admin/pubs" class="btn-secondary">Cancel</a>
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private PubFormModel model = new();
+    private List<Area> areas = [];
+    private bool loaded;
+    private bool saving;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        areas = await AreaService.GetAll();
+
+        if (Id.HasValue)
+        {
+            var pub = await PubService.GetById(Id.Value);
+            if (pub is null)
+            {
+                Navigation.NavigateTo("/admin/pubs");
+                return;
+            }
+            model = new PubFormModel
+            {
+                Name = pub.Name,
+                Description = pub.Description,
+                Address = pub.Address,
+                Lat = pub.Lat,
+                Lng = pub.Lng,
+                ImageUrl = pub.ImageUrl,
+                AreaId = pub.AreaId
+            };
+        }
+
+        loaded = true;
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (model.AreaId == 0)
+        {
+            errorMessage = "Please select an area.";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(model.Name))
+        {
+            errorMessage = "Name is required.";
+            return;
+        }
+
+        saving = true;
+        errorMessage = null;
+
+        if (Id.HasValue)
+        {
+            var pub = await PubService.GetById(Id.Value);
+            if (pub is not null)
+            {
+                pub.Name = model.Name.Trim();
+                pub.Description = model.Description?.Trim() ?? "";
+                pub.Address = model.Address?.Trim() ?? "";
+                pub.Lat = model.Lat;
+                pub.Lng = model.Lng;
+                pub.ImageUrl = string.IsNullOrWhiteSpace(model.ImageUrl) ? null : model.ImageUrl.Trim();
+                pub.AreaId = model.AreaId;
+                await PubService.Update(pub);
+            }
+        }
+        else
+        {
+            var pub = new Pub
+            {
+                Name = model.Name.Trim(),
+                Description = model.Description?.Trim() ?? "",
+                Address = model.Address?.Trim() ?? "",
+                Lat = model.Lat,
+                Lng = model.Lng,
+                ImageUrl = string.IsNullOrWhiteSpace(model.ImageUrl) ? null : model.ImageUrl.Trim(),
+                AreaId = model.AreaId
+            };
+            await PubService.Create(pub);
+        }
+
+        Navigation.NavigateTo("/admin/pubs");
+    }
+
+    private class PubFormModel
+    {
+        public string Name { get; set; } = "";
+        public string? Description { get; set; } = "";
+        public string? Address { get; set; } = "";
+        public double Lat { get; set; }
+        public double Lng { get; set; }
+        public string? ImageUrl { get; set; }
+        public int AreaId { get; set; }
+    }
+}

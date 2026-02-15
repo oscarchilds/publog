@@ -1,23 +1,43 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<div class="min-h-screen flex flex-col">
+    <header class="bg-amber-700 text-white shadow-md">
+        <nav class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="/" class="text-xl font-bold tracking-tight hover:text-amber-200 transition-colors">
+                PubLog
+            </a>
+            <div class="flex items-center gap-3">
+                <AuthorizeView>
+                    <Authorized Context="authState">
+                        <AuthorizeView Roles="Admin">
+                            <a href="/admin/areas" class="text-amber-100 hover:text-white text-sm font-medium min-h-[44px] flex items-center">
+                                Admin
+                            </a>
+                        </AuthorizeView>
+                        <span class="text-amber-200 text-sm">@authState.User.FindFirst("DisplayName")?.Value</span>
+                        <a href="/logout" class="btn-secondary !py-2 !min-h-[36px] !text-sm">Sign Out</a>
+                    </Authorized>
+                    <NotAuthorized>
+                        <a href="/login" class="btn-secondary !py-2 !min-h-[36px] !text-sm">Sign In</a>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </nav>
+    </header>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
+    <main class="flex-1 max-w-5xl mx-auto w-full px-4 py-6">
+        @Body
     </main>
+
+    <footer class="text-center text-sm text-gray-400 py-4">
+        PubLog &copy; @DateTime.Now.Year
+    </footer>
 </div>
 
-<div id="blazor-error-ui" data-nosnippet>
+<div id="blazor-error-ui" data-nosnippet
+     class="fixed bottom-0 left-0 right-0 bg-red-600 text-white text-center py-2 z-50 hidden">
     An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
+    <a href="." class="underline ml-2">Reload</a>
+    <span class="ml-2 cursor-pointer dismiss">&#x2715;</span>
 </div>

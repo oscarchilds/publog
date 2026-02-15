@@ -1,0 +1,149 @@
+@page "/admin/areas"
+@attribute [Authorize(Roles = "Admin")]
+@rendermode InteractiveServer
+@inject AreaService AreaService
+
+<PageTitle>Manage Areas - PubLog</PageTitle>
+
+<h1 class="text-2xl font-bold text-amber-900 mb-6">Manage Areas</h1>
+
+<div class="mb-6">
+    <div class="flex gap-2">
+        <input @bind="newAreaName" @bind:event="oninput" placeholder="New area name..."
+               class="input-field flex-1" @onkeydown="HandleKeyDown" />
+        <button @onclick="AddArea" disabled="@(string.IsNullOrWhiteSpace(newAreaName))"
+                class="btn-primary">Add</button>
+    </div>
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <p class="mt-2 text-sm @(isError ? "text-red-600" : "text-green-600")">@message</p>
+    }
+</div>
+
+@if (areas is null)
+{
+    <p class="text-gray-500">Loading...</p>
+}
+else if (areas.Count == 0)
+{
+    <p class="text-gray-500">No areas yet. Add one above.</p>
+}
+else
+{
+    <div class="space-y-3">
+        @foreach (var area in areas)
+        {
+            <div class="card flex items-center justify-between">
+                @if (editingId == area.Id)
+                {
+                    <input @bind="editName" class="input-field flex-1 mr-3" />
+                    <div class="flex gap-2">
+                        <button @onclick="() => SaveEdit(area)" class="btn-primary !py-2 !text-sm">Save</button>
+                        <button @onclick="CancelEdit" class="btn-secondary !py-2 !text-sm">Cancel</button>
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        <span class="font-semibold text-gray-800">@area.Name</span>
+                        <span class="text-sm text-gray-500 ml-2">(@area.Pubs.Count pubs)</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button @onclick="() => StartEdit(area)" class="btn-secondary !py-2 !text-sm">Edit</button>
+                        <button @onclick="() => DeleteArea(area)" class="btn-danger !py-2 !text-sm">Delete</button>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<Area>? areas;
+    private string newAreaName = "";
+    private string? message;
+    private bool isError;
+    private int? editingId;
+    private string editName = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAreas();
+    }
+
+    private async Task LoadAreas()
+    {
+        areas = await AreaService.GetAllWithPubCount();
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(newAreaName))
+            await AddArea();
+    }
+
+    private async Task AddArea()
+    {
+        if (string.IsNullOrWhiteSpace(newAreaName)) return;
+
+        if (await AreaService.NameExists(newAreaName.Trim()))
+        {
+            message = "An area with that name already exists.";
+            isError = true;
+            return;
+        }
+
+        await AreaService.Create(newAreaName.Trim());
+        newAreaName = "";
+        message = "Area added.";
+        isError = false;
+        await LoadAreas();
+    }
+
+    private void StartEdit(Area area)
+    {
+        editingId = area.Id;
+        editName = area.Name;
+        message = null;
+    }
+
+    private void CancelEdit()
+    {
+        editingId = null;
+        editName = "";
+    }
+
+    private async Task SaveEdit(Area area)
+    {
+        if (string.IsNullOrWhiteSpace(editName)) return;
+
+        if (await AreaService.NameExists(editName.Trim(), area.Id))
+        {
+            message = "An area with that name already exists.";
+            isError = true;
+            return;
+        }
+
+        area.Name = editName.Trim();
+        await AreaService.Update(area);
+        editingId = null;
+        message = "Area updated.";
+        isError = false;
+        await LoadAreas();
+    }
+
+    private async Task DeleteArea(Area area)
+    {
+        if (area.Pubs.Count > 0)
+        {
+            message = $"Cannot delete '{area.Name}' — it has {area.Pubs.Count} pub(s). Remove them first.";
+            isError = true;
+            return;
+        }
+
+        await AreaService.Delete(area.Id);
+        message = $"'{area.Name}' deleted.";
+        isError = false;
+        await LoadAreas();
+    }
+}

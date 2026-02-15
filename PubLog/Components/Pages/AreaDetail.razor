@@ -1,0 +1,93 @@
+@page "/area/{Id:int}"
+@rendermode InteractiveServer
+@inject AreaService AreaService
+@inject NavigationManager Navigation
+
+<PageTitle>@(area?.Name ?? "Area") - PubLog</PageTitle>
+
+@if (area is null)
+{
+    <p class="text-gray-500">Loading...</p>
+}
+else
+{
+    <div class="mb-4">
+        <a href="/" class="text-amber-600 hover:text-amber-800 text-sm">&larr; All Areas</a>
+    </div>
+
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold text-amber-900">@area.Name</h1>
+        <div class="flex gap-2">
+            <button @onclick="() => showMap = false"
+                    class="@ListBtnClass !py-2 !text-sm">
+                List
+            </button>
+            <button @onclick="() => showMap = true"
+                    class="@MapBtnClass !py-2 !text-sm"
+                    disabled="@(area.Pubs.Count == 0)">
+                Map
+            </button>
+        </div>
+    </div>
+
+    @if (area.Pubs.Count == 0)
+    {
+        <p class="text-gray-500">No pubs in this area yet.</p>
+    }
+    else if (showMap)
+    {
+        <LeafletMap
+            CenterLat="area.Pubs.Average(p => p.Lat)"
+            CenterLng="area.Pubs.Average(p => p.Lng)"
+            Zoom="14"
+            Height="500px"
+            Markers="GetMarkers()" />
+    }
+    else
+    {
+        <div class="space-y-3">
+            @foreach (var pub in area.Pubs.OrderBy(p => p.Name))
+            {
+                <a href="/pub/@pub.Id" class="card block hover:border-amber-300">
+                    <h2 class="font-semibold text-amber-800">@pub.Name</h2>
+                    @if (!string.IsNullOrWhiteSpace(pub.Address))
+                    {
+                        <p class="text-sm text-gray-500 mt-1">@pub.Address</p>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(pub.Description))
+                    {
+                        <p class="text-sm text-gray-600 mt-1 line-clamp-2">@pub.Description</p>
+                    }
+                </a>
+            }
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Area? area;
+    private bool showMap;
+
+    private string ListBtnClass => !showMap ? "btn-primary" : "btn-secondary";
+    private string MapBtnClass => showMap ? "btn-primary" : "btn-secondary";
+
+    private List<MapMarker> GetMarkers()
+    {
+        if (area is null) return [];
+        return area.Pubs.Select(p => new MapMarker(
+            p.Lat, p.Lng,
+            $"<a href='/pub/{p.Id}'><b>{p.Name}</b></a><br/>{p.Address}"
+        )).ToList();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        area = await AreaService.GetById(Id);
+        if (area is null)
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+}

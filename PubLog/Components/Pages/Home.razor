@@ -1,7 +1,53 @@
-﻿@page "/"
+@page "/"
+@rendermode InteractiveServer
+@inject AreaService AreaService
 
-<PageTitle>Home</PageTitle>
+<PageTitle>PubLog - Track Your Pub Visits</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-amber-900 mb-2">Areas</h1>
+    <input @bind="searchQuery" @bind:event="oninput" placeholder="Search areas..."
+           class="input-field max-w-sm" />
+</div>
 
-Welcome to your new app.
+@if (areas is null)
+{
+    <p class="text-gray-500">Loading areas...</p>
+}
+else
+{
+    var filtered = FilteredAreas;
+    @if (filtered.Count == 0)
+    {
+        <p class="text-gray-500">No areas found.</p>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach (var area in filtered)
+            {
+                <a href="/area/@area.Id" class="card block hover:border-amber-300">
+                    <h2 class="text-lg font-semibold text-amber-800">@area.Name</h2>
+                    <p class="text-sm text-gray-500 mt-1">
+                        @area.Pubs.Count pub@(area.Pubs.Count != 1 ? "s" : "")
+                    </p>
+                </a>
+            }
+        </div>
+    }
+}
+
+@code {
+    private List<Area>? areas;
+    private string searchQuery = "";
+
+    private List<Area> FilteredAreas =>
+        areas?.Where(a => string.IsNullOrEmpty(searchQuery) ||
+                          a.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
+              .ToList() ?? [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        areas = await AreaService.GetAllWithPubCount();
+    }
+}
