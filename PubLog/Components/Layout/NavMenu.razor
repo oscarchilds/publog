@@ -1,0 +1,71 @@
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Authorization
+
+<nav class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="/" @onclick="CloseMenu" class="text-xl font-bold tracking-tight hover:text-amber-200 transition-colors">
+        PubLog
+    </a>
+
+    <button @onclick="() => menuOpen = !menuOpen" class="sm:hidden min-h-[44px] min-w-[44px] flex flex-col items-center justify-center gap-1.5">
+        <span class="block w-6 h-0.5 bg-white"></span>
+        <span class="block w-6 h-0.5 bg-white"></span>
+        <span class="block w-6 h-0.5 bg-white"></span>
+    </button>
+
+    <div class="hidden sm:flex items-center gap-3">
+        <AuthorizeView>
+            <Authorized Context="authState">
+                <a href="/visits" class="text-amber-100 hover:text-white text-sm font-medium min-h-[44px] flex items-center">
+                    My Visits
+                </a>
+                <a href="/profile" class="text-amber-100 hover:text-white text-sm font-medium min-h-[44px] flex items-center">
+                    Profile
+                </a>
+                <AuthorizeView Roles="Admin">
+                    <a href="/admin/areas" class="text-amber-100 hover:text-white text-sm font-medium min-h-[44px] flex items-center">
+                        Admin
+                    </a>
+                </AuthorizeView>
+                <span class="text-amber-200 text-sm">@authState.User.FindFirst("DisplayName")?.Value</span>
+                <a href="/logout" class="btn-secondary !py-2 !min-h-[36px] !text-sm">Sign Out</a>
+            </Authorized>
+            <NotAuthorized>
+                <a href="/login" class="btn-secondary !py-2 !min-h-[36px] !text-sm">Sign In</a>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+</nav>
+
+@if (menuOpen)
+{
+    <div class="sm:hidden bg-amber-800 px-4 py-3 space-y-2">
+        <AuthorizeView>
+            <Authorized Context="authState">
+                <a href="/visits" @onclick="CloseMenu" class="block text-amber-100 hover:text-white py-2 font-medium">
+                    My Visits
+                </a>
+                <a href="/profile" @onclick="CloseMenu" class="block text-amber-100 hover:text-white py-2 font-medium">
+                    Profile
+                </a>
+                <AuthorizeView Roles="Admin">
+                    <a href="/admin/areas" @onclick="CloseMenu" class="block text-amber-100 hover:text-white py-2 font-medium">
+                        Admin
+                    </a>
+                </AuthorizeView>
+                <div class="flex items-center justify-between pt-2 border-t border-amber-600">
+                    <span class="text-amber-200 text-sm">@authState.User.FindFirst("DisplayName")?.Value</span>
+                    <a href="/logout" @onclick="CloseMenu" class="btn-secondary !py-2 !min-h-[36px] !text-sm">Sign Out</a>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <a href="/login" @onclick="CloseMenu" class="btn-secondary !py-2 !min-h-[36px] !text-sm inline-block">Sign In</a>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+}
+
+@code {
+    private bool menuOpen;
+
+    private void CloseMenu() => menuOpen = false;
+}

@@ -14,7 +14,7 @@
 
 @if (pubs is null)
 {
-    <p class="text-gray-500">Loading...</p>
+    <LoadingSpinner />
 }
 else if (pubs.Count == 0)
 {
@@ -22,10 +22,7 @@ else if (pubs.Count == 0)
 }
 else
 {
-    @if (!string.IsNullOrEmpty(message))
-    {
-        <p class="mb-4 text-sm text-green-600">@message</p>
-    }
+    <AlertMessage Message="@message" />
 
     <div class="space-y-3">
         @foreach (var pub in pubs)
@@ -37,16 +34,23 @@ else
                 </div>
                 <div class="flex gap-2">
                     <a href="/admin/pubs/@pub.Id/edit" class="btn-secondary !py-2 !text-sm">Edit</a>
-                    <button @onclick="() => DeletePub(pub)" class="btn-danger !py-2 !text-sm">Delete</button>
+                    <button @onclick="() => PromptDelete(pub)" class="btn-danger !py-2 !text-sm">Delete</button>
                 </div>
             </div>
         }
     </div>
 }
 
+<ConfirmDialog Visible="pendingDeletePub is not null"
+               Title="Delete Pub"
+               Message="@($"Are you sure you want to delete '{pendingDeletePub?.Name}'? All visits will be removed.")"
+               OnConfirm="ConfirmDeletePub"
+               OnCancel="() => pendingDeletePub = null" />
+
 @code {
     private List<Pub>? pubs;
     private string? message;
+    private Pub? pendingDeletePub;
 
     protected override async Task OnInitializedAsync()
     {
@@ -58,10 +62,15 @@ else
         pubs = await PubService.GetAll();
     }
 
-    private async Task DeletePub(Pub pub)
+    private void PromptDelete(Pub pub) => pendingDeletePub = pub;
+
+    private async Task ConfirmDeletePub()
     {
-        await PubService.Delete(pub.Id);
-        message = $"'{pub.Name}' deleted.";
+        if (pendingDeletePub is null) return;
+        var name = pendingDeletePub.Name;
+        await PubService.Delete(pendingDeletePub.Id);
+        pendingDeletePub = null;
+        message = $"'{name}' deleted.";
         await LoadPubs();
     }
 }

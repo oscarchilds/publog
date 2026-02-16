@@ -50,4 +50,14 @@
     @apply bg-white rounded-xl shadow-sm border border-gray-100 p-4
            hover:shadow-md transition-shadow duration-150;
   }
+
+  .spinner {
+    @apply w-8 h-8 border-4 border-gray-200 rounded-full;
+    border-top-color: #d97706;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

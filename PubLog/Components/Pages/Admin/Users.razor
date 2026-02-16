@@ -34,42 +34,38 @@
             </div>
         </div>
 
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <p class="text-red-600 text-sm">@errorMessage</p>
-        }
-        @if (!string.IsNullOrEmpty(successMessage))
-        {
-            <p class="text-green-600 text-sm">@successMessage</p>
-        }
+        <AlertMessage Message="@errorMessage" IsError="true" />
+        <AlertMessage Message="@successMessage" />
 
-        <button type="submit" class="btn-primary">Create User</button>
+        <button type="submit" class="btn-primary" disabled="@creating">
+            @(creating ? "Creating..." : "Create User")
+        </button>
     </EditForm>
 </div>
 
 @if (users is null)
 {
-    <p class="text-gray-500">Loading...</p>
+    <LoadingSpinner />
 }
 else
 {
     <div class="space-y-2">
         @foreach (var user in users)
         {
-            <div class="card flex items-center justify-between">
-                <div>
+            <div class="card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div class="flex flex-wrap items-center gap-1">
                     <span class="font-medium text-gray-800">@user.DisplayName</span>
-                    <span class="text-sm text-gray-500 ml-2">@@@user.Username</span>
-                    <span class="ml-2 text-xs px-2 py-0.5 rounded-full @(user.Role == UserRole.Admin ? "bg-amber-100 text-amber-800" : "bg-gray-100 text-gray-600")">
+                    <span class="text-sm text-gray-500 ml-1">@@@user.Username</span>
+                    <span class="ml-1 text-xs px-2 py-0.5 rounded-full @(user.Role == UserRole.Admin ? "bg-amber-100 text-amber-800" : "bg-gray-100 text-gray-600")">
                         @user.Role
                     </span>
                     @if (!user.IsActive)
                     {
-                        <span class="ml-2 text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">Inactive</span>
+                        <span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">Inactive</span>
                     }
                 </div>
-                <button @onclick="() => ToggleActive(user.Id)"
-                        class="btn-secondary !py-1 !text-xs @(user.IsActive ? "!text-red-600" : "!text-green-600")">
+                <button @onclick="() => PromptToggle(user)"
+                        class="btn-secondary !py-1 !text-xs @(user.IsActive ? "!text-red-600" : "!text-green-600") self-start sm:self-auto">
                     @(user.IsActive ? "Deactivate" : "Activate")
                 </button>
             </div>
@@ -77,10 +73,18 @@ else
     </div>
 }
 
+<ConfirmDialog Visible="pendingToggleUser is not null"
+               Title="@(pendingToggleUser?.IsActive == true ? "Deactivate User" : "Activate User")"
+               Message="@($"Are you sure you want to {(pendingToggleUser?.IsActive == true ? "deactivate" : "activate")} '{pendingToggleUser?.DisplayName}'?")"
+               OnConfirm="ConfirmToggle"
+               OnCancel="() => pendingToggleUser = null" />
+
 @code {
     private List<User>? users;
     private string? errorMessage;
     private string? successMessage;
+    private bool creating;
+    private User? pendingToggleUser;
     private CreateUserModel newUser = new();
 
     private class CreateUserModel
@@ -119,15 +123,21 @@ else
             return;
         }
 
+        creating = true;
         await UserService.CreateUser(newUser.Username, newUser.Password, newUser.DisplayName, newUser.Role);
         successMessage = $"User '{newUser.Username}' created successfully.";
         newUser = new();
+        creating = false;
         await LoadUsers();
     }
 
-    private async Task ToggleActive(int userId)
+    private void PromptToggle(User user) => pendingToggleUser = user;
+
+    private async Task ConfirmToggle()
     {
-        await UserService.ToggleActive(userId);
+        if (pendingToggleUser is null) return;
+        await UserService.ToggleActive(pendingToggleUser.Id);
+        pendingToggleUser = null;
         await LoadUsers();
     }
 }

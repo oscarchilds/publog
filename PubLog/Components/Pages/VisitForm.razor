@@ -10,7 +10,7 @@
 
 @if (pub is null)
 {
-    <p class="text-gray-500">Loading...</p>
+    <LoadingSpinner />
 }
 else
 {
@@ -35,16 +35,24 @@ else
         </div>
 
         <div class="flex gap-3">
-            <button type="submit" class="btn-primary">Save</button>
+            <button type="submit" class="btn-primary" disabled="@saving">
+                @(saving ? "Saving..." : "Save")
+            </button>
             @if (isEdit)
             {
-                <button type="button" @onclick="DeleteVisit" class="btn-secondary !text-red-600 !border-red-300 hover:!bg-red-50">
+                <button type="button" @onclick="ShowDeleteConfirm" class="btn-secondary !text-red-600 !border-red-300 hover:!bg-red-50">
                     Delete Visit
                 </button>
             }
             <a href="/pub/@PubId" class="btn-secondary">Cancel</a>
         </div>
     </EditForm>
+
+    <ConfirmDialog Visible="showDeleteConfirm"
+                   Title="Delete Visit"
+                   Message="Are you sure you want to delete this visit? This cannot be undone."
+                   OnConfirm="ConfirmDelete"
+                   OnCancel="() => showDeleteConfirm = false" />
 }
 
 @code {
@@ -54,6 +62,8 @@ else
     private Pub? pub;
     private Visit? existingVisit;
     private bool isEdit;
+    private bool saving;
+    private bool showDeleteConfirm;
     private VisitModel model = new();
     private int userId;
 
@@ -92,6 +102,8 @@ else
 
     private async Task Save()
     {
+        saving = true;
+
         if (isEdit && existingVisit is not null)
         {
             existingVisit.VisitDate = model.VisitDate;
@@ -112,8 +124,11 @@ else
         Navigation.NavigateTo($"/pub/{PubId}");
     }
 
-    private async Task DeleteVisit()
+    private void ShowDeleteConfirm() => showDeleteConfirm = true;
+
+    private async Task ConfirmDelete()
     {
+        showDeleteConfirm = false;
         if (existingVisit is not null)
         {
             await VisitService.Delete(existingVisit.Id);

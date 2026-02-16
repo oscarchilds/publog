@@ -1,35 +1,8 @@
 @inherits LayoutComponentBase
-@using Microsoft.AspNetCore.Components.Authorization
 
 <div class="min-h-screen flex flex-col">
     <header class="bg-amber-700 text-white shadow-md">
-        <nav class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="/" class="text-xl font-bold tracking-tight hover:text-amber-200 transition-colors">
-                PubLog
-            </a>
-            <div class="flex items-center gap-3">
-                <AuthorizeView>
-                    <Authorized Context="authState">
-                        <a href="/visits" class="text-amber-100 hover:text-white text-sm font-medium min-h-[44px] flex items-center">
-                            My Visits
-                        </a>
-                        <a href="/profile" class="text-amber-100 hover:text-white text-sm font-medium min-h-[44px] flex items-center">
-                            Profile
-                        </a>
-                        <AuthorizeView Roles="Admin">
-                            <a href="/admin/areas" class="text-amber-100 hover:text-white text-sm font-medium min-h-[44px] flex items-center">
-                                Admin
-                            </a>
-                        </AuthorizeView>
-                        <span class="text-amber-200 text-sm">@authState.User.FindFirst("DisplayName")?.Value</span>
-                        <a href="/logout" class="btn-secondary !py-2 !min-h-[36px] !text-sm">Sign Out</a>
-                    </Authorized>
-                    <NotAuthorized>
-                        <a href="/login" class="btn-secondary !py-2 !min-h-[36px] !text-sm">Sign In</a>
-                    </NotAuthorized>
-                </AuthorizeView>
-            </div>
-        </nav>
+        <NavMenu />
     </header>
 
     <main class="flex-1 max-w-5xl mx-auto w-full px-4 py-6">
@@ -37,7 +10,7 @@
     </main>
 
     <footer class="text-center text-sm text-gray-400 py-4">
-        PubLog &copy; @DateTime.Now.Year
+        PubLog
     </footer>
 </div>
 
