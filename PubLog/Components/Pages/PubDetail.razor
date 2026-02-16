@@ -1,7 +1,9 @@
 @page "/pub/{Id:int}"
 @rendermode InteractiveServer
 @inject PubService PubService
+@inject VisitService VisitService
 @inject NavigationManager Navigation
+@using System.Security.Claims
 
 <PageTitle>@(pub?.Name ?? "Pub") - PubLog</PageTitle>
 
@@ -20,6 +22,22 @@ else
     @if (!string.IsNullOrWhiteSpace(pub.Address))
     {
         <p class="text-gray-600 mb-4">@pub.Address</p>
+    }
+
+    @if (userVisit is not null)
+    {
+        <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-3 mb-4 flex items-center justify-between">
+            <span class="text-green-800 text-sm">
+                You visited on @userVisit.VisitDate.ToString("d MMM yyyy")
+            </span>
+            <a href="/pub/@Id/visit" class="text-amber-600 hover:text-amber-800 text-sm font-medium">Update Visit</a>
+        </div>
+    }
+    else if (isAuthenticated)
+    {
+        <div class="mb-4">
+            <a href="/pub/@Id/visit" class="btn-primary">Mark as Visited</a>
+        </div>
     }
 
     @if (!string.IsNullOrWhiteSpace(pub.ImageUrl))
@@ -71,8 +89,11 @@ else
 
 @code {
     [Parameter] public int Id { get; set; }
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = null!;
 
     private Pub? pub;
+    private Visit? userVisit;
+    private bool isAuthenticated;
 
     private List<MapMarker> GetMarkers()
     {
@@ -86,6 +107,18 @@ else
         if (pub is null)
         {
             Navigation.NavigateTo("/");
+            return;
+        }
+
+        var auth = await AuthState;
+        isAuthenticated = auth.User.Identity?.IsAuthenticated == true;
+        if (isAuthenticated)
+        {
+            var userIdClaim = auth.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim is not null)
+            {
+                userVisit = await VisitService.GetByUserAndPub(int.Parse(userIdClaim), Id);
+            }
         }
     }
 }

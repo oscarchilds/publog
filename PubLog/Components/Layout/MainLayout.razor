@@ -10,6 +10,12 @@
             <div class="flex items-center gap-3">
                 <AuthorizeView>
                     <Authorized Context="authState">
+                        <a href="/visits" class="text-amber-100 hover:text-white text-sm font-medium min-h-[44px] flex items-center">
+                            My Visits
+                        </a>
+                        <a href="/profile" class="text-amber-100 hover:text-white text-sm font-medium min-h-[44px] flex items-center">
+                            Profile
+                        </a>
                         <AuthorizeView Roles="Admin">
                             <a href="/admin/areas" class="text-amber-100 hover:text-white text-sm font-medium min-h-[44px] flex items-center">
                                 Admin

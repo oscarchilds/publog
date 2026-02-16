@@ -1,0 +1,102 @@
+@page "/profile"
+@rendermode InteractiveServer
+@attribute [Authorize]
+@inject UserService UserService
+@inject VisitService VisitService
+@inject AreaService AreaService
+@using System.Security.Claims
+
+<PageTitle>Profile - PubLog</PageTitle>
+
+@if (user is null)
+{
+    <p class="text-gray-500">Loading...</p>
+}
+else
+{
+    <h1 class="text-2xl font-bold text-amber-900 mb-6">Profile</h1>
+
+    <div class="card mb-6">
+        <h2 class="text-lg font-semibold text-gray-800">@user.DisplayName</h2>
+        <p class="text-sm text-gray-500">@@@user.Username</p>
+        <p class="text-sm text-gray-500 mt-1">Member since @user.CreatedAt.ToString("d MMM yyyy")</p>
+    </div>
+
+    <div class="card mb-6">
+        <h2 class="text-lg font-semibold text-amber-800 mb-3">Stats</h2>
+        <div class="grid grid-cols-3 gap-4 text-center">
+            <div>
+                <p class="text-2xl font-bold text-amber-700">@stats.PubsVisited</p>
+                <p class="text-xs text-gray-500">Visited</p>
+            </div>
+            <div>
+                <p class="text-2xl font-bold text-gray-700">@stats.TotalPubs</p>
+                <p class="text-xs text-gray-500">Total Pubs</p>
+            </div>
+            <div>
+                <p class="text-2xl font-bold text-green-600">@(stats.TotalPubs > 0 ? (stats.PubsVisited * 100 / stats.TotalPubs) : 0)%</p>
+                <p class="text-xs text-gray-500">Complete</p>
+            </div>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2.5 mt-4">
+            <div class="bg-green-500 h-2.5 rounded-full transition-all"
+                 style="width: @(stats.TotalPubs > 0 ? (stats.PubsVisited * 100 / stats.TotalPubs) : 0)%"></div>
+        </div>
+    </div>
+
+    @if (areaBreakdown.Count > 0)
+    {
+        <div class="card mb-6">
+            <h2 class="text-lg font-semibold text-amber-800 mb-3">Per Area</h2>
+            <div class="space-y-3">
+                @foreach (var ab in areaBreakdown)
+                {
+                    <div>
+                        <div class="flex items-center justify-between text-sm mb-1">
+                            <span class="font-medium text-gray-700">@ab.AreaName</span>
+                            <span class="text-gray-500">@ab.Visited / @ab.Total</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-green-500 h-2 rounded-full transition-all"
+                                 style="width: @(ab.Total > 0 ? (ab.Visited * 100 / ab.Total) : 0)%"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <a href="/visits" class="btn-primary">View My Visits</a>
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = null!;
+
+    private User? user;
+    private (int PubsVisited, int TotalPubs) stats;
+    private List<AreaBreakdownItem> areaBreakdown = [];
+
+    private record AreaBreakdownItem(string AreaName, int Visited, int Total);
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthState;
+        var userIdClaim = auth.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userIdClaim is null) return;
+        var userId = int.Parse(userIdClaim);
+
+        user = await UserService.GetById(userId);
+        stats = await VisitService.GetUserStats(userId);
+
+        var visitedPubIds = await VisitService.GetVisitedPubIds(userId);
+        var areas = await AreaService.GetAllWithPubCount();
+        areaBreakdown = areas
+            .Where(a => a.Pubs.Count > 0)
+            .Select(a => new AreaBreakdownItem(
+                a.Name,
+                a.Pubs.Count(p => visitedPubIds.Contains(p.Id)),
+                a.Pubs.Count))
+            .OrderByDescending(a => a.Total > 0 ? (double)a.Visited / a.Total : 0)
+            .ToList();
+    }
+}

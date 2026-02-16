@@ -1,0 +1,88 @@
+@page "/visits"
+@rendermode InteractiveServer
+@attribute [Authorize]
+@inject VisitService VisitService
+@inject AreaService AreaService
+@using System.Security.Claims
+
+<PageTitle>My Visits - PubLog</PageTitle>
+
+<h1 class="text-2xl font-bold text-amber-900 mb-6">My Visits</h1>
+
+<div class="flex flex-wrap gap-3 mb-4">
+    <input @bind="searchQuery" @bind:event="oninput" placeholder="Search pubs..."
+           class="input-field max-w-xs" />
+    <select @bind="selectedAreaId" class="input-field max-w-xs">
+        <option value="0">All Areas</option>
+        @if (areas is not null)
+        {
+            @foreach (var area in areas)
+            {
+                <option value="@area.Id">@area.Name</option>
+            }
+        }
+    </select>
+</div>
+
+@if (visits is null)
+{
+    <p class="text-gray-500">Loading...</p>
+}
+else if (FilteredVisits.Count == 0)
+{
+    <p class="text-gray-500">
+        @(visits.Count == 0 ? "You haven't visited any pubs yet. Start exploring!" : "No visits match your filters.")
+    </p>
+}
+else
+{
+    <div class="space-y-3">
+        @foreach (var visit in FilteredVisits)
+        {
+            <div class="card">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <a href="/pub/@visit.PubId" class="font-semibold text-amber-800 hover:text-amber-600">
+                            @visit.Pub.Name
+                        </a>
+                        <span class="text-sm text-gray-500 ml-2">@visit.Pub.Area.Name</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm text-gray-500">@visit.VisitDate.ToString("d MMM yyyy")</span>
+                        <a href="/pub/@visit.PubId/visit" class="text-amber-600 hover:text-amber-800 text-sm">Update</a>
+                    </div>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(visit.Notes))
+                {
+                    <p class="text-sm text-gray-600 mt-1 line-clamp-2">@visit.Notes</p>
+                }
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = null!;
+
+    private List<Visit>? visits;
+    private List<Area>? areas;
+    private string searchQuery = "";
+    private int selectedAreaId;
+
+    private List<Visit> FilteredVisits =>
+        visits?.Where(v =>
+            (selectedAreaId == 0 || v.Pub.AreaId == selectedAreaId) &&
+            (string.IsNullOrEmpty(searchQuery) ||
+             v.Pub.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)))
+        .ToList() ?? [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthState;
+        var userIdClaim = auth.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userIdClaim is null) return;
+
+        visits = await VisitService.GetByUser(int.Parse(userIdClaim));
+        areas = await AreaService.GetAll();
+    }
+}

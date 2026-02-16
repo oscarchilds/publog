@@ -28,6 +28,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AreaService>();
 builder.Services.AddScoped<PubService>();
+builder.Services.AddScoped<VisitService>();
 
 // Blazor
 builder.Services.AddRazorComponents()
@@ -44,11 +45,19 @@ using (var scope = app.Services.CreateScope())
     if (!await db.Users.AnyAsync(u => u.Role == UserRole.Admin))
     {
         var config = app.Configuration.GetSection("AdminSeed");
+
+        var username = config["Username"];
+        var password = config["Password"];
+        var displayname = config["DisplayName"];
+
+        if (username is null || password is null || displayname is null)
+            throw new Exception("Error fetching admin seeding information.");
+
         var admin = new User
         {
-            Username = config["Username"] ?? "admin",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(config["Password"] ?? "ChangeMe123!"),
-            DisplayName = config["DisplayName"] ?? "Admin",
+            Username = username,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
+            DisplayName = displayname,
             Role = UserRole.Admin
         };
         db.Users.Add(admin);

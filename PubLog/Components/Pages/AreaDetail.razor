@@ -1,7 +1,9 @@
 @page "/area/{Id:int}"
 @rendermode InteractiveServer
 @inject AreaService AreaService
+@inject VisitService VisitService
 @inject NavigationManager Navigation
+@using System.Security.Claims
 
 <PageTitle>@(area?.Name ?? "Area") - PubLog</PageTitle>
 
@@ -15,7 +17,7 @@ else
         <a href="/" class="text-amber-600 hover:text-amber-800 text-sm">&larr; All Areas</a>
     </div>
 
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-bold text-amber-900">@area.Name</h1>
         <div class="flex gap-2">
             <button @onclick="() => showMap = false"
@@ -29,6 +31,30 @@ else
             </button>
         </div>
     </div>
+
+    @if (isAuthenticated && area.Pubs.Count > 0)
+    {
+        var visitedCount = area.Pubs.Count(p => visitedPubIds.Contains(p.Id));
+        var totalPubs = area.Pubs.Count;
+        <div class="mb-4">
+            <div class="flex items-center justify-between text-sm text-gray-600 mb-1">
+                <span>@visitedCount of @totalPubs pubs visited</span>
+                <span>@(totalPubs > 0 ? (visitedCount * 100 / totalPubs) : 0)%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-green-500 h-2.5 rounded-full transition-all"
+                     style="width: @(totalPubs > 0 ? (visitedCount * 100 / totalPubs) : 0)%"></div>
+            </div>
+        </div>
+    }
+
+    @if (!showMap)
+    {
+        <div class="mb-4">
+            <input @bind="searchQuery" @bind:event="oninput" placeholder="Search pubs..."
+                   class="input-field max-w-sm" />
+        </div>
+    }
 
     @if (area.Pubs.Count == 0)
     {
@@ -45,40 +71,67 @@ else
     }
     else
     {
-        <div class="space-y-3">
-            @foreach (var pub in area.Pubs.OrderBy(p => p.Name))
-            {
-                <a href="/pub/@pub.Id" class="card block hover:border-amber-300">
-                    <h2 class="font-semibold text-amber-800">@pub.Name</h2>
-                    @if (!string.IsNullOrWhiteSpace(pub.Address))
-                    {
-                        <p class="text-sm text-gray-500 mt-1">@pub.Address</p>
-                    }
-                    @if (!string.IsNullOrWhiteSpace(pub.Description))
-                    {
-                        <p class="text-sm text-gray-600 mt-1 line-clamp-2">@pub.Description</p>
-                    }
-                </a>
-            }
-        </div>
+        var filtered = FilteredPubs;
+        @if (filtered.Count == 0)
+        {
+            <p class="text-gray-500">No pubs match your search.</p>
+        }
+        else
+        {
+            <div class="space-y-3">
+                @foreach (var pub in filtered)
+                {
+                    var isVisited = visitedPubIds.Contains(pub.Id);
+                    <a href="/pub/@pub.Id" class="card block hover:border-amber-300 @(isVisited && isAuthenticated ? "border-green-300 bg-green-50/50" : "")">
+                        <div class="flex items-center gap-2">
+                            @if (isAuthenticated && isVisited)
+                            {
+                                <span class="text-green-600 text-lg" title="Visited">&#10003;</span>
+                            }
+                            <h2 class="font-semibold text-amber-800">@pub.Name</h2>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(pub.Address))
+                        {
+                            <p class="text-sm text-gray-500 mt-1">@pub.Address</p>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(pub.Description))
+                        {
+                            <p class="text-sm text-gray-600 mt-1 line-clamp-2">@pub.Description</p>
+                        }
+                    </a>
+                }
+            </div>
+        }
     }
 }
 
 @code {
     [Parameter] public int Id { get; set; }
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = null!;
 
     private Area? area;
     private bool showMap;
+    private string searchQuery = "";
+    private bool isAuthenticated;
+    private HashSet<int> visitedPubIds = [];
 
     private string ListBtnClass => !showMap ? "btn-primary" : "btn-secondary";
     private string MapBtnClass => showMap ? "btn-primary" : "btn-secondary";
+
+    private List<Pub> FilteredPubs =>
+        area?.Pubs
+            .Where(p => string.IsNullOrEmpty(searchQuery) ||
+                        p.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(p => p.Name)
+            .ToList() ?? [];
 
     private List<MapMarker> GetMarkers()
     {
         if (area is null) return [];
         return area.Pubs.Select(p => new MapMarker(
             p.Lat, p.Lng,
-            $"<a href='/pub/{p.Id}'><b>{p.Name}</b></a><br/>{p.Address}"
+            $"<a href='/pub/{p.Id}'><b>{p.Name}</b></a><br/>{p.Address}",
+            isAuthenticated && visitedPubIds.Contains(p.Id) ? "#22c55e" : "#3b82f6"
         )).ToList();
     }
 
@@ -88,6 +141,18 @@ else
         if (area is null)
         {
             Navigation.NavigateTo("/");
+            return;
+        }
+
+        var auth = await AuthState;
+        isAuthenticated = auth.User.Identity?.IsAuthenticated == true;
+        if (isAuthenticated)
+        {
+            var userIdClaim = auth.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim is not null)
+            {
+                visitedPubIds = await VisitService.GetVisitedPubIds(int.Parse(userIdClaim));
+            }
         }
     }
 }
