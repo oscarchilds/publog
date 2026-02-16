@@ -9,6 +9,8 @@ public class Pub
     public double Lat { get; set; }
     public double Lng { get; set; }
     public string? ImageUrl { get; set; }
+    public string? GooglePlaceId { get; set; }
+    public string? TripAdvisorUrl { get; set; }
     public int AreaId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

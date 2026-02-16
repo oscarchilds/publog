@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PubLog.Data;
 
@@ -11,9 +12,11 @@ using PubLog.Data;
 namespace PubLog.Migrations
 {
     [DbContext(typeof(PubLogDbContext))]
-    partial class PubLogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260216073530_AddPubExternalLinks")]
+    partial class AddPubExternalLinks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -56,11 +56,11 @@ else
     </div>
 
     <div class="flex flex-wrap gap-3 mb-6">
-        <a href="https://www.google.com/maps/search/?api=1&query=@pub.Lat,@pub.Lng"
+        <a href="@(!string.IsNullOrWhiteSpace(pub.GooglePlaceId) ? $"https://www.google.com/maps/place/?q=place_id:{pub.GooglePlaceId}" : $"https://www.google.com/maps/search/?api=1&query={pub.Lat},{pub.Lng}")"
            target="_blank" rel="noopener" class="btn-secondary !text-sm">
             Google Maps
         </a>
-        <a href="https://www.tripadvisor.com/Search?q=@Uri.EscapeDataString(pub.Name + " " + pub.Address)"
+        <a href="@(!string.IsNullOrWhiteSpace(pub.TripAdvisorUrl) ? pub.TripAdvisorUrl : $"https://www.tripadvisor.com/Search?q={Uri.EscapeDataString(pub.Name + " " + pub.Address)}")"
            target="_blank" rel="noopener" class="btn-secondary !text-sm">
             TripAdvisor
         </a>

@@ -35,6 +35,8 @@ public class PubLogDbContext : DbContext
             e.Property(p => p.Description).HasMaxLength(2000);
             e.Property(p => p.Address).HasMaxLength(500);
             e.Property(p => p.ImageUrl).HasMaxLength(500);
+            e.Property(p => p.GooglePlaceId).HasMaxLength(500);
+            e.Property(p => p.TripAdvisorUrl).HasMaxLength(500);
             e.HasOne(p => p.Area).WithMany(a => a.Pubs).HasForeignKey(p => p.AreaId);
         });
 

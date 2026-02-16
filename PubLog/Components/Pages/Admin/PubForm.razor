@@ -70,6 +70,16 @@ else
                 <InputText @bind-Value="model.ImageUrl" class="input-field" />
             </div>
 
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Google Place ID (optional)</label>
+                <InputText @bind-Value="model.GooglePlaceId" class="input-field" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">TripAdvisor URL (optional)</label>
+                <InputText @bind-Value="model.TripAdvisorUrl" class="input-field" />
+            </div>
+
             <div class="flex gap-3 pt-2">
                 <button type="submit" class="btn-primary" disabled="@saving">
                     @(saving ? "Saving..." : (Id.HasValue ? "Update Pub" : "Create Pub"))
@@ -109,6 +119,8 @@ else
                 Lat = pub.Lat,
                 Lng = pub.Lng,
                 ImageUrl = pub.ImageUrl,
+                GooglePlaceId = pub.GooglePlaceId,
+                TripAdvisorUrl = pub.TripAdvisorUrl,
                 AreaId = pub.AreaId
             };
         }
@@ -143,6 +155,8 @@ else
                 pub.Lat = model.Lat;
                 pub.Lng = model.Lng;
                 pub.ImageUrl = string.IsNullOrWhiteSpace(model.ImageUrl) ? null : model.ImageUrl.Trim();
+                pub.GooglePlaceId = string.IsNullOrWhiteSpace(model.GooglePlaceId) ? null : model.GooglePlaceId.Trim();
+                pub.TripAdvisorUrl = string.IsNullOrWhiteSpace(model.TripAdvisorUrl) ? null : model.TripAdvisorUrl.Trim();
                 pub.AreaId = model.AreaId;
                 await PubService.Update(pub);
             }
@@ -157,6 +171,8 @@ else
                 Lat = model.Lat,
                 Lng = model.Lng,
                 ImageUrl = string.IsNullOrWhiteSpace(model.ImageUrl) ? null : model.ImageUrl.Trim(),
+                GooglePlaceId = string.IsNullOrWhiteSpace(model.GooglePlaceId) ? null : model.GooglePlaceId.Trim(),
+                TripAdvisorUrl = string.IsNullOrWhiteSpace(model.TripAdvisorUrl) ? null : model.TripAdvisorUrl.Trim(),
                 AreaId = model.AreaId
             };
             await PubService.Create(pub);
@@ -173,6 +189,8 @@ else
         public double Lat { get; set; }
         public double Lng { get; set; }
         public string? ImageUrl { get; set; }
+        public string? GooglePlaceId { get; set; }
+        public string? TripAdvisorUrl { get; set; }
         public int AreaId { get; set; }
     }
 }
