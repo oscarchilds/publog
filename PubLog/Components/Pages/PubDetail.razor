@@ -14,23 +14,23 @@
 else
 {
     <div class="mb-4">
-        <a href="/area/@pub.AreaId" class="text-amber-600 hover:text-amber-800 text-sm">&larr; @pub.Area.Name</a>
+        <a href="/area/@pub.AreaId" class="text-blue-400 hover:text-blue-300 text-sm">&larr; @pub.Area.Name</a>
     </div>
 
-    <h1 class="text-2xl font-bold text-amber-900 mb-2">@pub.Name</h1>
+    <h1 class="text-2xl font-bold text-slate-100 mb-2">@pub.Name</h1>
 
     @if (!string.IsNullOrWhiteSpace(pub.Address))
     {
-        <p class="text-gray-600 mb-4">@pub.Address</p>
+        <p class="text-slate-400 mb-4">@pub.Address</p>
     }
 
     @if (userVisit is not null)
     {
-        <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-3 mb-4 flex items-center justify-between">
-            <span class="text-green-800 text-sm">
+        <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-4 py-3 mb-4 flex items-center justify-between">
+            <span class="text-emerald-400 text-sm">
                 You visited on @userVisit.VisitDate.ToString("d MMM yyyy")
             </span>
-            <a href="/pub/@Id/visit" class="text-amber-600 hover:text-amber-800 text-sm font-medium">Update Visit</a>
+            <a href="/pub/@Id/visit" class="text-blue-400 hover:text-blue-300 text-sm font-medium">Update Visit</a>
         </div>
     }
     else if (isAuthenticated)
@@ -47,7 +47,7 @@ else
 
     @if (!string.IsNullOrWhiteSpace(pub.Description))
     {
-        <p class="text-gray-700 mb-6">@pub.Description</p>
+        <p class="text-slate-300 mb-6">@pub.Description</p>
     }
 
     <div class="mb-6">
@@ -68,18 +68,18 @@ else
 
     @if (pub.Visits.Count > 0)
     {
-        <h2 class="text-lg font-semibold text-amber-800 mb-3">Visits (@pub.Visits.Count)</h2>
+        <h2 class="text-lg font-semibold text-slate-100 mb-3">Visits (@pub.Visits.Count)</h2>
         <div class="space-y-2">
             @foreach (var visit in pub.Visits.OrderByDescending(v => v.VisitDate))
             {
                 <div class="card">
                     <div class="flex items-center justify-between">
-                        <span class="font-medium text-gray-800">@visit.User.DisplayName</span>
-                        <span class="text-sm text-gray-500">@visit.VisitDate.ToString("d MMM yyyy")</span>
+                        <span class="font-medium text-slate-200">@visit.User.DisplayName</span>
+                        <span class="text-sm text-slate-400">@visit.VisitDate.ToString("d MMM yyyy")</span>
                     </div>
                     @if (!string.IsNullOrWhiteSpace(visit.Notes))
                     {
-                        <p class="text-sm text-gray-600 mt-1">@visit.Notes</p>
+                        <p class="text-sm text-slate-400 mt-1">@visit.Notes</p>
                     }
                 </div>
             }

@@ -8,7 +8,7 @@
 
 <AdminNav />
 <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-amber-900">Manage Pubs</h1>
+    <h1 class="text-2xl font-bold text-slate-100">Manage Pubs</h1>
     <a href="/admin/pubs/new" class="btn-primary">Add Pub</a>
 </div>
 
@@ -18,7 +18,7 @@
 }
 else if (pubs.Count == 0)
 {
-    <p class="text-gray-500">No pubs yet. <a href="/admin/pubs/new" class="text-amber-600 underline">Add one</a>.</p>
+    <p class="text-slate-400">No pubs yet. <a href="/admin/pubs/new" class="text-blue-400 underline">Add one</a>.</p>
 }
 else
 {
@@ -29,8 +29,8 @@ else
         {
             <div class="card flex items-center justify-between">
                 <div>
-                    <span class="font-semibold text-gray-800">@pub.Name</span>
-                    <span class="text-sm text-gray-500 ml-2">(@pub.Area.Name)</span>
+                    <span class="font-semibold text-slate-100">@pub.Name</span>
+                    <span class="text-sm text-slate-400 ml-2">(@pub.Area.Name)</span>
                 </div>
                 <div class="flex gap-2">
                     <a href="/admin/pubs/@pub.Id/edit" class="btn-secondary !py-2 !text-sm">Edit</a>

@@ -15,21 +15,21 @@
 else
 {
     <div class="mb-4">
-        <a href="/pub/@PubId" class="text-amber-600 hover:text-amber-800 text-sm">&larr; @pub.Name</a>
+        <a href="/pub/@PubId" class="text-blue-400 hover:text-blue-300 text-sm">&larr; @pub.Name</a>
     </div>
 
-    <h1 class="text-2xl font-bold text-amber-900 mb-6">
+    <h1 class="text-2xl font-bold text-slate-100 mb-6">
         @(isEdit ? "Update Visit" : "Mark as Visited") — @pub.Name
     </h1>
 
     <EditForm Model="model" OnValidSubmit="Save" FormName="VisitForm" class="space-y-4 max-w-lg">
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Visit Date</label>
+            <label class="block text-sm font-medium text-slate-300 mb-1">Visit Date</label>
             <InputDate @bind-Value="model.VisitDate" class="input-field" />
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Notes (optional)</label>
+            <label class="block text-sm font-medium text-slate-300 mb-1">Notes (optional)</label>
             <InputTextArea @bind-Value="model.Notes" class="input-field" rows="4"
                            placeholder="How was your visit?" />
         </div>
@@ -40,7 +40,7 @@ else
             </button>
             @if (isEdit)
             {
-                <button type="button" @onclick="ShowDeleteConfirm" class="btn-secondary !text-red-600 !border-red-300 hover:!bg-red-50">
+                <button type="button" @onclick="ShowDeleteConfirm" class="btn-danger">
                     Delete Visit
                 </button>
             }

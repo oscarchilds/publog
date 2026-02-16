@@ -2,9 +2,9 @@
 
 ## IMPORTANT: Read the Specification First
 
-Before starting any work on this project, **you MUST read the complete specification**:
+Before starting any work on this project, **you MUST read the complete specifications**:
 
-📄 **Location:** `/docs/spec.md`
+📄 **Functional Spec:** `/docs/spec.md`
 
 The spec contains:
 
@@ -14,6 +14,14 @@ The spec contains:
 - User roles and permissions (Anonymous, User, Admin)
 - Page-by-page UI specifications
 - Development phases and priorities
+
+📄 **Style Guide:** `/docs/style.md`
+
+The style guide contains:
+
+- Code style and conventions
+- Naming standards
+- Best practices for this project
 
 ## Key Decisions Already Made
 

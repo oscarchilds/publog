@@ -14,11 +14,11 @@
 else
 {
     <div class="mb-4">
-        <a href="/" class="text-amber-600 hover:text-amber-800 text-sm">&larr; All Areas</a>
+        <a href="/" class="text-blue-400 hover:text-blue-300 text-sm">&larr; All Areas</a>
     </div>
 
     <div class="flex items-center justify-between mb-4">
-        <h1 class="text-2xl font-bold text-amber-900">@area.Name</h1>
+        <h1 class="text-2xl font-bold text-slate-100">@area.Name</h1>
         <div class="flex gap-2">
             <button @onclick="() => showMap = false"
                     class="@ListBtnClass !py-2 !text-sm">
@@ -37,12 +37,12 @@ else
         var visitedCount = area.Pubs.Count(p => visitedPubIds.Contains(p.Id));
         var totalPubs = area.Pubs.Count;
         <div class="mb-4">
-            <div class="flex items-center justify-between text-sm text-gray-600 mb-1">
+            <div class="flex items-center justify-between text-sm text-slate-400 mb-1">
                 <span>@visitedCount of @totalPubs pubs visited</span>
                 <span>@(totalPubs > 0 ? (visitedCount * 100 / totalPubs) : 0)%</span>
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                <div class="bg-green-500 h-2.5 rounded-full transition-all"
+            <div class="w-full bg-slate-800 rounded-full h-2.5">
+                <div class="bg-gradient-to-r from-blue-500 to-blue-400 h-2.5 rounded-full transition-all"
                      style="width: @(totalPubs > 0 ? (visitedCount * 100 / totalPubs) : 0)%"></div>
             </div>
         </div>
@@ -58,7 +58,7 @@ else
 
     @if (area.Pubs.Count == 0)
     {
-        <p class="text-gray-500">No pubs in this area yet.</p>
+        <p class="text-slate-400">No pubs in this area yet.</p>
     }
     else if (showMap)
     {
@@ -74,7 +74,7 @@ else
         var filtered = FilteredPubs;
         @if (filtered.Count == 0)
         {
-            <p class="text-gray-500">No pubs match your search.</p>
+            <p class="text-slate-400">No pubs match your search.</p>
         }
         else
         {
@@ -82,21 +82,21 @@ else
                 @foreach (var pub in filtered)
                 {
                     var isVisited = visitedPubIds.Contains(pub.Id);
-                    <a href="/pub/@pub.Id" class="card block hover:border-amber-300 @(isVisited && isAuthenticated ? "border-green-300 bg-green-50/50" : "")">
+                    <a href="/pub/@pub.Id" class="card block @(isVisited && isAuthenticated ? "border-emerald-500/30 bg-emerald-500/10" : "")">
                         <div class="flex items-center gap-2">
                             @if (isAuthenticated && isVisited)
                             {
-                                <span class="text-green-600 text-lg" title="Visited">&#10003;</span>
+                                <span class="text-emerald-400 text-lg" title="Visited">&#10003;</span>
                             }
-                            <h2 class="font-semibold text-amber-800">@pub.Name</h2>
+                            <h2 class="font-semibold text-slate-100">@pub.Name</h2>
                         </div>
                         @if (!string.IsNullOrWhiteSpace(pub.Address))
                         {
-                            <p class="text-sm text-gray-500 mt-1">@pub.Address</p>
+                            <p class="text-sm text-slate-400 mt-1">@pub.Address</p>
                         }
                         @if (!string.IsNullOrWhiteSpace(pub.Description))
                         {
-                            <p class="text-sm text-gray-600 mt-1 line-clamp-2">@pub.Description</p>
+                            <p class="text-sm text-slate-400 mt-1 line-clamp-2">@pub.Description</p>
                         }
                     </a>
                 }

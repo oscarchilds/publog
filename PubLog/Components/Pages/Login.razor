@@ -7,11 +7,11 @@
 
 <div class="min-h-screen flex items-center justify-center px-4">
     <div class="w-full max-w-sm">
-        <h1 class="text-2xl font-bold text-amber-900 mb-6 text-center">Sign In</h1>
+        <h1 class="text-2xl font-bold text-slate-100 mb-6 text-center">Sign In</h1>
 
         @if (!string.IsNullOrEmpty(errorMessage))
         {
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+            <div class="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded mb-4">
                 @errorMessage
             </div>
         }
@@ -19,12 +19,12 @@
         <form method="post" @formname="login">
             <AntiforgeryToken />
             <div class="mb-4">
-                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                <label for="username" class="block text-sm font-medium text-slate-300 mb-1">Username</label>
                 <input type="text" id="username" name="username" required autocomplete="username"
                        class="input-field" />
             </div>
             <div class="mb-6">
-                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <label for="password" class="block text-sm font-medium text-slate-300 mb-1">Password</label>
                 <input type="password" id="password" name="password" required autocomplete="current-password"
                        class="input-field" />
             </div>

@@ -7,7 +7,7 @@
 
 <PageTitle>My Visits - PubLog</PageTitle>
 
-<h1 class="text-2xl font-bold text-amber-900 mb-6">My Visits</h1>
+<h1 class="text-2xl font-bold text-slate-100 mb-6">My Visits</h1>
 
 <div class="flex flex-wrap gap-3 mb-4">
     <input @bind="searchQuery" @bind:event="oninput" placeholder="Search pubs..."
@@ -30,7 +30,7 @@
 }
 else if (FilteredVisits.Count == 0)
 {
-    <p class="text-gray-500">
+    <p class="text-slate-400">
         @(visits.Count == 0 ? "You haven't visited any pubs yet. Start exploring!" : "No visits match your filters.")
     </p>
 }
@@ -42,19 +42,19 @@ else
             <div class="card">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0">
                     <div>
-                        <a href="/pub/@visit.PubId" class="font-semibold text-amber-800 hover:text-amber-600">
+                        <a href="/pub/@visit.PubId" class="font-semibold text-blue-400 hover:text-blue-300">
                             @visit.Pub.Name
                         </a>
-                        <span class="text-sm text-gray-500 ml-2">@visit.Pub.Area.Name</span>
+                        <span class="text-sm text-slate-400 ml-2">@visit.Pub.Area.Name</span>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="text-sm text-gray-500">@visit.VisitDate.ToString("d MMM yyyy")</span>
-                        <a href="/pub/@visit.PubId/visit" class="text-amber-600 hover:text-amber-800 text-sm">Update</a>
+                        <span class="text-sm text-slate-400">@visit.VisitDate.ToString("d MMM yyyy")</span>
+                        <a href="/pub/@visit.PubId/visit" class="text-blue-400 hover:text-blue-300 text-sm">Update</a>
                     </div>
                 </div>
                 @if (!string.IsNullOrWhiteSpace(visit.Notes))
                 {
-                    <p class="text-sm text-gray-600 mt-1 line-clamp-2">@visit.Notes</p>
+                    <p class="text-sm text-slate-400 mt-1 line-clamp-2">@visit.Notes</p>
                 }
             </div>
         }

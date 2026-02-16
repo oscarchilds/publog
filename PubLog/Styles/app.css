@@ -1,59 +1,66 @@
 @import "tailwindcss";
 
 @theme {
-  --color-amber-50: #fffbeb;
-  --color-amber-100: #fef3c7;
-  --color-amber-200: #fde68a;
-  --color-amber-300: #fcd34d;
-  --color-amber-400: #fbbf24;
-  --color-amber-500: #f59e0b;
-  --color-amber-600: #d97706;
-  --color-amber-700: #b45309;
-  --color-amber-800: #92400e;
-  --color-amber-900: #78350f;
-  --color-amber-950: #451a03;
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #0f1419;
+  --color-blue-400: #60a5fa;
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
 }
 
 @layer components {
   .btn-primary {
     @apply inline-flex items-center justify-center px-4 py-3 min-h-[44px]
-           bg-amber-600 text-white font-semibold rounded-lg
-           hover:bg-amber-700 active:bg-amber-800
-           transition-colors duration-150 cursor-pointer
+           bg-blue-500 text-white font-semibold rounded-lg shadow-md
+           hover:bg-blue-600 hover:shadow-lg active:bg-blue-700
+           transition-all duration-150 cursor-pointer
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
     @apply inline-flex items-center justify-center px-4 py-3 min-h-[44px]
-           bg-gray-200 text-gray-800 font-semibold rounded-lg
-           hover:bg-gray-300 active:bg-gray-400
+           bg-slate-800 text-slate-100 font-semibold rounded-lg
+           border border-slate-600
+           hover:bg-slate-700 active:bg-slate-600
            transition-colors duration-150 cursor-pointer
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-danger {
     @apply inline-flex items-center justify-center px-4 py-3 min-h-[44px]
-           bg-red-600 text-white font-semibold rounded-lg
-           hover:bg-red-700 active:bg-red-800
+           bg-red-500 text-white font-semibold rounded-lg
+           hover:bg-red-600 active:bg-red-700
            transition-colors duration-150 cursor-pointer
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .input-field {
     @apply w-full px-3 py-3 min-h-[44px]
-           border border-gray-300 rounded-lg
-           focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500
+           bg-slate-800 text-slate-100 border border-slate-600 rounded-lg
+           placeholder-slate-400
+           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
            transition-colors duration-150;
   }
 
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-4
-           hover:shadow-md transition-shadow duration-150;
+    @apply bg-slate-900 rounded-lg shadow-lg border border-slate-700 p-4
+           hover:bg-slate-800 hover:shadow-xl transition-all duration-150;
   }
 
   .spinner {
-    @apply w-8 h-8 border-4 border-gray-200 rounded-full;
-    border-top-color: #d97706;
+    @apply w-8 h-8 border-4 border-slate-700 rounded-full;
+    border-top-color: #3b82f6;
     animation: spin 0.8s linear infinite;
   }
 }

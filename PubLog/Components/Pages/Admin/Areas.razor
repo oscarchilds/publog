@@ -6,7 +6,7 @@
 <PageTitle>Manage Areas - PubLog</PageTitle>
 
 <AdminNav />
-<h1 class="text-2xl font-bold text-amber-900 mb-6">Manage Areas</h1>
+<h1 class="text-2xl font-bold text-slate-100 mb-6">Manage Areas</h1>
 
 <div class="mb-6">
     <div class="flex gap-2">
@@ -24,7 +24,7 @@
 }
 else if (areas.Count == 0)
 {
-    <p class="text-gray-500">No areas yet. Add one above.</p>
+    <p class="text-slate-400">No areas yet. Add one above.</p>
 }
 else
 {
@@ -43,8 +43,8 @@ else
                 else
                 {
                     <div>
-                        <span class="font-semibold text-gray-800">@area.Name</span>
-                        <span class="text-sm text-gray-500 ml-2">(@area.Pubs.Count pubs)</span>
+                        <span class="font-semibold text-slate-100">@area.Name</span>
+                        <span class="text-sm text-slate-400 ml-2">(@area.Pubs.Count pubs)</span>
                     </div>
                     <div class="flex gap-2">
                         <button @onclick="() => StartEdit(area)" class="btn-secondary !py-2 !text-sm">Edit</button>
